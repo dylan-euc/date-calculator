@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Date Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0f1a;
+      --bg-card: #111827;
+      --accent: #f59e0b;
+      --accent-glow: rgba(245, 158, 11, 0.3);
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border: #1e293b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-dark);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      background-image: 
+        radial-gradient(ellipse at 20% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 100%, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      font-weight: 300;
+      margin-bottom: 2.5rem;
+    }
+
+    .input-group {
+      position: relative;
+      margin-bottom: 2.5rem;
+    }
+
+    label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    input[type="date"] {
+      width: 100%;
+      padding: 1rem 1.25rem;
+      font-size: 1.25rem;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 400;
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      color: var(--text-primary);
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    input[type="date"]:hover {
+      border-color: #334155;
+    }
+
+    input[type="date"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      opacity: 0.6;
+      cursor: pointer;
+    }
+
+    .results {
+      display: grid;
+      gap: 1rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s ease;
+    }
+
+    .results.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .result-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .result-card:hover {
+      border-color: #334155;
+      transform: translateX(4px);
+    }
+
+    .days-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .result-date {
+      font-size: 1.125rem;
+      font-weight: 400;
+      color: var(--text-primary);
+    }
+
+    .result-weekday {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    .stagger-1 { animation-delay: 0ms; }
+    .stagger-2 { animation-delay: 50ms; }
+    .stagger-3 { animation-delay: 100ms; }
+    .stagger-4 { animation-delay: 150ms; }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .results.visible .result-card {
+      animation: slideIn 0.3s ease forwards;
+    }
+
+    .copy-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .copy-btn:hover {
+      background: #fbbf24;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .copy-btn:active {
+      transform: translateY(0);
+    }
+
+    .copy-btn.copied {
+      background: #10b981;
+    }
+
+    .copy-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Date Calculator</h1>
+    <p class="subtitle">Find key dates 30, 60, 90 & 180 days out</p>
+
+    <div class="input-group">
+      <label for="startDate">Starting Date</label>
+      <input type="date" id="startDate">
+    </div>
+
+    <div class="results" id="results">
+      <div class="result-card stagger-1">
+        <span class="days-label">+30 Days</span>
+        <div>
+          <div class="result-date" id="date30">—</div>
+          <div class="result-weekday" id="weekday30"></div>
+        </div>
+      </div>
+      <div class="result-card stagger-2">
+        <span class="days-label">+60 Days</span>
+        <div>
+          <div class="result-date" id="date60">—</div>
+          <div class="result-weekday" id="weekday60"></div>
+        </div>
+      </div>
+      <div class="result-card stagger-3">
+        <span class="days-label">+90 Days</span>
+        <div>
+          <div class="result-date" id="date90">—</div>
+          <div class="result-weekday" id="weekday90"></div>
+        </div>
+      </div>
+      <div class="result-card stagger-4">
+        <span class="days-label">+180 Days</span>
+        <div>
+          <div class="result-date" id="date180">—</div>
+          <div class="result-weekday" id="weekday180"></div>
+        </div>
+      </div>
+      <button class="copy-btn" id="copyBtn" onclick="copyAll()">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+        </svg>
+        Copy All Dates
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const dateInput = document.getElementById('startDate');
+    const resultsContainer = document.getElementById('results');
+    
+    // Set default to today
+    const today = new Date();
+    dateInput.value = today.toISOString().split('T')[0];
+    
+    function formatDate(date) {
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    function getWeekday(date) {
+      return date.toLocaleDateString('en-US', { weekday: 'long' });
+    }
+
+    function addDays(date, days) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+
+    function calculate() {
+      const startDate = new Date(dateInput.value + 'T00:00:00');
+      
+      if (isNaN(startDate.getTime())) {
+        resultsContainer.classList.remove('visible');
+        return;
+      }
+
+      const intervals = [30, 60, 90, 180];
+      
+      intervals.forEach(days => {
+        const futureDate = addDays(startDate, days);
+        document.getElementById(`date${days}`).textContent = formatDate(futureDate);
+        document.getElementById(`weekday${days}`).textContent = '';
+      });
+
+      resultsContainer.classList.add('visible');
+    }
+
+    dateInput.addEventListener('change', calculate);
+    
+    // Initial calculation
+    calculate();
+
+    function copyAll() {
+      const text = `30 days: ${document.getElementById('date30').textContent}
+
+60 days: ${document.getElementById('date60').textContent}
+
+90 days: ${document.getElementById('date90').textContent}
+
+180 days: ${document.getElementById('date180').textContent}`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+        </svg> Copied!`;
+        btn.classList.add('copied');
+        
+        setTimeout(() => {
+          btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
+          </svg> Copy All Dates`;
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
+
